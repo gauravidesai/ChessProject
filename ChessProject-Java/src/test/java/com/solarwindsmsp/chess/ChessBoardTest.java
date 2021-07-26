@@ -25,47 +25,56 @@ public class ChessBoardTest extends TestCase {
     }
 
     @Test
-    public void testIsLegalBoardPosition_True_X_equals_0_Y_equals_0() {
+    public void testIsLegalBoardPosition_True_X_equals_0_Y_equals_0() throws Exception {
         boolean isValidPosition = testSubject.isLegalBoardPosition(0, 0);
         assertTrue(isValidPosition);
     }
 
     @Test
-    public void testIsLegalBoardPosition_True_X_equals_5_Y_equals_5() {
+    public void testIsLegalBoardPosition_True_X_equals_5_Y_equals_5() throws Exception{
         boolean isValidPosition = testSubject.isLegalBoardPosition(5, 5);
         Assert.assertTrue(isValidPosition);
     }
 
     @Test
-    public void testIsLegalBoardPosition_False_X_equals_11_Y_equals_5() {
+    public void testIsLegalBoardPosition_False_X_equals_11_Y_equals_5() throws Exception{
         boolean isValidPosition = testSubject.isLegalBoardPosition(11, 5);
-        assertTrue(isValidPosition);
+        assertFalse(isValidPosition);
     }
 
     @Test
-    public void testIsLegalBoardPosition_False_X_equals_0_Y_equals_9() {
+    public void testIsLegalBoardPosition_False_X_equals_0_Y_equals_9() throws Exception{
         boolean isValidPosition = testSubject.isLegalBoardPosition(0, 9);
         assertFalse(isValidPosition);
     }
 
     @Test
-    public void testIsLegalBoardPosition_False_X_equals_11_Y_equals_0() {
+    public void testIsLegalBoardPosition_False_X_equals_11_Y_equals_0() throws Exception{
         boolean isValidPosition = testSubject.isLegalBoardPosition(11, 0);
         assertFalse(isValidPosition);
     }
 
     @Test
-    public void testIsLegalBoardPosition_False_For_Negative_Y_Values() {
+    public void testIsLegalBoardPosition_False_For_Negative_Y_Values() throws Exception{
         boolean isValidPosition = testSubject.isLegalBoardPosition(5, -1);
         Assert.assertFalse(isValidPosition);
     }
 
     @Test
-    public void testAvoids_Duplicate_Positioning() {
+    public void testAvoids_Duplicate_Positioning() throws Exception{
         Pawn firstPawn = new Pawn(PieceColor.BLACK);
         Pawn secondPawn = new Pawn(PieceColor.BLACK);
-        testSubject.addPiece(firstPawn, 6, 3, PieceColor.BLACK);
-        testSubject.addPiece(secondPawn, 6, 3, PieceColor.BLACK);
+        try {
+            testSubject.addPiece(firstPawn, 6, 3, PieceColor.BLACK);
+            testSubject.addPiece(secondPawn, 6, 3, PieceColor.BLACK);
+        }
+        catch (Exception e)
+        {
+            assertTrue( e instanceof InvalidPositionException );
+            assertEquals( 6, ( (InvalidPositionException)e ).getxCoordinate() );
+            assertEquals( 3, ( (InvalidPositionException)e ).getyCoordinate() );
+            assertEquals( testSubject, ( (InvalidPositionException)e ).getChessBoard() );
+        }
         assertEquals(6, firstPawn.getXCoordinate());
         assertEquals(3, firstPawn.getYCoordinate());
         assertEquals(-1, secondPawn.getXCoordinate());
@@ -73,13 +82,23 @@ public class ChessBoardTest extends TestCase {
     }
 
     @Test
-    public void testLimits_The_Number_Of_Pawns()
+    public void testLimits_The_Number_Of_Pawns() throws Exception
     {
         for (int i = 0; i < 10; i++)
         {
             Pawn pawn = new Pawn(PieceColor.BLACK);
             int row = i / ChessBoard.MAX_BOARD_WIDTH;
-            testSubject.addPiece(pawn, 6 + row, i % ChessBoard.MAX_BOARD_WIDTH, PieceColor.BLACK);
+            try {
+                testSubject.addPiece(pawn, 6 + row, i % ChessBoard.MAX_BOARD_WIDTH, PieceColor.BLACK);
+            }
+            catch(InvalidPositionException e)
+            {
+                if ( i < ChessBoard.MAX_BOARD_WIDTH )
+                {
+                    e.printStackTrace();
+                    fail( e.getMessage() );
+                }
+            }
             if (row < 1)
             {
                 assertEquals(6 + row, pawn.getXCoordinate());
